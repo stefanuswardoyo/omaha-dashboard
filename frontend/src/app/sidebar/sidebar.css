@@ -1,0 +1,30 @@
+
+.mobilebar {
+    position: fixed;
+    top: 0;
+    right: -300px;   /*Start with the sidebar hidden outside the viewport. */
+    height: 100%;
+    width: 300px;
+    background-color: #1C2536;
+    transition: right 0.5s ease;
+    padding: 20px;
+    z-index: 9;
+    color: white;
+    /* box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); */
+  }
+  
+ .mobilebar.open {
+    left: 0;  /* Show the sidebar by moving it to the right */
+  } 
+
+  .sidebar {
+    width: 20%;
+    background-color: #1C2536;
+    padding: 20px;
+    height: 100%;
+    color: white;
+    position: absolute;
+    /* border-top-right-radius: 8px; */
+    transition: all;
+    z-index: 2;
+  }
