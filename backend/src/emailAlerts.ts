@@ -17,7 +17,7 @@ export async function alertEmailTypes() {
         Number(account.Equity) - Number(account.Balance);
       let required_pnl_for_alert =
         (Number(account.ProfitPercentage) / 100) *
-        Number(account.SettingBalance);
+        Number(account.Balance);
       required_pnl_for_alert = required_pnl_for_alert * -1;
 
       // Case Alert Type 1
