@@ -68,7 +68,7 @@ const QIG_Dashboard = () => {
       try {
         let storedUsername;
         if (typeof window !== "undefined") {
-          storedUsername = String(localStorage.getItem("username"));
+          storedUsername = String(localStorage.getItem("Username"));
         }
 
         const response = await fetch(

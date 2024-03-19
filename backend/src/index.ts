@@ -351,9 +351,8 @@ app.post("/reset-password", authenticateToken, async (req, res) => {
     const users = await Admin.find();
     console.log(users);
     const admin = await Admin.findOne({ Username: username });
-
     if (!admin) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: "Admin not found" });
     }
 
     // Check if the old password matches the stored hashed password

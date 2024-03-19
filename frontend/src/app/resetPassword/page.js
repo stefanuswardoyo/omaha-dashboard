@@ -33,7 +33,7 @@ const ResetPassword = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const username = localStorage.getItem("username");
+    const username = localStorage.getItem("Username");
     const accessToken = localStorage.getItem("token");
 
     console.log(username, "username", oldPassword, newPassword);
