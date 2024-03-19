@@ -593,7 +593,10 @@ const QIG_Dashboard = () => {
                       <span className="row-label">Balance:</span>
                     </div>
                     <span className="row-value">
-                      ${Number(item.Balance).toFixed(2)}
+                      $
+                      {parseFloat(item.Balance).toLocaleString("en-US", {
+                        minimumFractionDigits: 2,
+                      })}
                     </span>
                   </div>
 
@@ -607,24 +610,28 @@ const QIG_Dashboard = () => {
                     </div>
                     <span
                       className={`row-value ${
-                        Number(item.Equity) > Number(item.Balance)
+                        parseFloat(item.Equity) > parseFloat(item.Balance)
                           ? "dark-green"
-                          : Number(item.Equity) < Number(item.Balance)
+                          : parseFloat(item.Equity) < parseFloat(item.Balance)
                           ? "red"
                           : ""
                       }`}
                       style={{
                         color:
-                          Number(item.Equity) > Number(item.Balance)
+                          parseFloat(item.Equity) > parseFloat(item.Balance)
                             ? "darkgreen"
-                            : Number(item.Equity) < Number(item.Balance)
+                            : parseFloat(item.Equity) < parseFloat(item.Balance)
                             ? "red"
                             : "white",
                       }}
                     >
-                      ${Number(item.Equity).toFixed(2)}
+                      $
+                      {parseFloat(item.Equity).toLocaleString("en-US", {
+                        minimumFractionDigits: 2,
+                      })}
                     </span>
                   </div>
+
                   <div className="row-divider"></div>
                   <div className="card-row">
                     <div className="row-item">
@@ -647,13 +654,11 @@ const QIG_Dashboard = () => {
                     <span
                       className={`row-value ${
                         (
-                          Number(item.Equity).toFixed(2) -
-                          Number(item.Balance).toFixed(2)
+                          parseFloat(item.Equity) - parseFloat(item.Balance)
                         ).toFixed(2) > 0
                           ? "dark-green"
                           : (
-                              Number(item.Equity).toFixed(2) -
-                              Number(item.Balance).toFixed(2)
+                              parseFloat(item.Equity) - parseFloat(item.Balance)
                             ).toFixed(2) < 0
                           ? "red"
                           : "white"
@@ -661,23 +666,22 @@ const QIG_Dashboard = () => {
                       style={{
                         color:
                           (
-                            Number(item.Equity).toFixed(2) -
-                            Number(item.Balance).toFixed(2)
+                            parseFloat(item.Equity) - parseFloat(item.Balance)
                           ).toFixed(2) > 0
                             ? "darkgreen"
                             : (
-                                Number(item.Equity).toFixed(2) -
-                                Number(item.Balance).toFixed(2)
+                                parseFloat(item.Equity) -
+                                parseFloat(item.Balance)
                               ).toFixed(2) < 0
                             ? "red"
                             : "white",
                       }}
                     >
                       $
-                      {(
-                        Number(item.Equity).toFixed(2) -
-                        Number(item.Balance).toFixed(2)
-                      ).toFixed(2)}
+                      {parseFloat(item.Equity - item.Balance).toLocaleString(
+                        "en-US",
+                        { minimumFractionDigits: 2 }
+                      )}
                     </span>
                   </div>
 
@@ -762,7 +766,11 @@ const QIG_Dashboard = () => {
                     </div>
                     <br></br>
                     <span className="row-value">
-                      Target: ${previousBalance[index]}
+                      Target: $
+                      {parseFloat(previousBalance[index]).toLocaleString(
+                        "en-US",
+                        { minimumFractionDigits: 2 }
+                      )}
                     </span>
                   </div>
                   <div className="row-divider"></div>
@@ -850,7 +858,11 @@ const QIG_Dashboard = () => {
                     </div>
                     <br></br>
                     <span className="row-value">
-                      Setting Balance: ${previousSettingBalance[index]}
+                      Setting Balance: $
+                      {parseFloat(previousSettingBalance[index]).toLocaleString(
+                        "en-US",
+                        { minimumFractionDigits: 2 }
+                      )}
                     </span>
                   </div>
                   <div className="row-divider"></div>
