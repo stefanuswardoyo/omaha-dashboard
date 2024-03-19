@@ -9,10 +9,8 @@ import Admin from "./models/Admin";
 const bcrypt = require("bcryptjs");
 import dotenv from "dotenv";
 import {alertEmailTypes}  from "./emailAlerts";
-
 dotenv.config();
 const tokenJwt: string = process.env.JWT_TOKEN || "JxVmG85yEnYrXQq3rTfTjzKZcTgRGsRw";
-
 const app = express();
 app.use(cors()); // Enable CORS for all routes
 app.use(express.json());
@@ -47,19 +45,6 @@ async function checkIfAdminExist() {
 
 checkIfAdminExist();
 
-const newData = new Account({
-  AccountName: "",
-  Server: "",
-  InitialDeposit: "",
-  Balance: "",
-  Equity: "",
-  OpenPositions: "",
-  LastHeartBeat: "",
-  ProfitPercentage: "",
-  TargetBalance: "",
-  Alert: "",
-  AlertInterval: "",
-});
 
 app.get("/account/data", async (req: Request, res: Response) => {
   try {
@@ -363,16 +348,16 @@ app.post("/reset-password", authenticateToken, async (req, res) => {
   console.log(username, oldPassword, newPassword, confirmPassword);
   try {
     // Find the user by their username or ID
-    const users = await User.find();
+    const users = await Admin.find();
     console.log(users);
-    const user = await User.findOne({ Username: username });
+    const admin = await Admin.findOne({ Username: username });
 
-    if (!user) {
+    if (!admin) {
       return res.status(404).json({ message: "User not found" });
     }
 
     // Check if the old password matches the stored hashed password
-    const isMatch = await bcrypt.compare(oldPassword, user.Password);
+    const isMatch = await bcrypt.compare(oldPassword, admin.Password);
 
     if (!isMatch) {
       return res.status(401).json({ message: "Old password is incorrect" });
@@ -387,8 +372,8 @@ app.post("/reset-password", authenticateToken, async (req, res) => {
 
     // Hash the new password and update the user's password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    user.Password = hashedPassword;
-    await user.save();
+    admin.Password = hashedPassword;
+    await admin.save();
 
     res.json({ message: "Password updated successfully" });
   } catch (error) {

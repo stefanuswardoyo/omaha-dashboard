@@ -4,6 +4,8 @@ import {
   sendAlertTypeTwoPercentage,
 } from "./emails/alertTypeTwo";
 import Account from "../src/models/account";
+import dotenv from "dotenv";
+dotenv.config();
 
 export async function alertEmailTypes() {
   try {
@@ -30,7 +32,7 @@ export async function alertEmailTypes() {
         if (account.Alert == true) {
           if (
             previousAlertTime.getTime() === 0 ||
-            timeDifference > Number(account.AlertInterval)
+            timeDifference > Number(process.env.ALERT_INTERVAL)
           ) {
             sendAlertTypeOne(account)
               .then(() => {
@@ -57,7 +59,7 @@ export async function alertEmailTypes() {
         if (account.Alert == true) {
           if (
             previousAlertTime.getTime() === 0 ||
-            timeDifference > Number(account.AlertInterval)
+            timeDifference > Number(process.env.ALERT_INTERVAL)
           ) {
             sendAlertTypeTwoTargetBalance(account)
               .then(() => {
