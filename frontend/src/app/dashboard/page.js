@@ -18,14 +18,11 @@ import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Switch from "@mui/material/Switch";
 import EmailIcon from "@mui/icons-material/Email";
-
 const moment = require("moment");
-
-// require("dotenv").config();
-// const server_url = process.env.SERVER_URL;
+require("dotenv").config();
+const server_url = process.env.SERVER_URL;
 
 const QIG_Dashboard = () => {
-  const server_url = "http://localhost:8000";
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [Balance, setBalance] = useState([]);
