@@ -11,11 +11,10 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
 import "./Login.css";
 
-//require("dotenv").config();
-//const server_url = process.env.SERVER_URL;
+require("dotenv").config();
+const server_url = process.env.SERVER_URL;
 
 const NewLogin = () => {
-  const server_url = "http://localhost:8000";
   const [Password, setPassword] = useState("");
   const [isPasswordInput, setIsPasswordInput] = useState(false);
   const [Username, setUsername] = useState("");
@@ -41,9 +40,6 @@ const NewLogin = () => {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-    localStorage.setItem("isSawyerLoggedIn", "true");
-    localStorage.setItem("Username", "admin@gmail.com");
-    router.push("/dashboard");
     try {
       console.log("Sending Login Request", `${server_url}/login-admin`);
       const response = await fetch(`${server_url}/login-admin`, {
@@ -61,11 +57,7 @@ const NewLogin = () => {
         // Store the token in localStorage or session storage
         localStorage.setItem("token", data.token);
         localStorage.setItem("Username", Username);
-        localStorage.setItem("isSawyerLoggedIn", "true");
-
-        console.log("token", data.token);
-        console.log("Username", Username);
-        console.log("Login : Successful");
+        localStorage.setItem("isLoggedIn", "true");
         toast.success("Login successful!", { position: "bottom-right" });
         router.push("/dashboard");
       } else {

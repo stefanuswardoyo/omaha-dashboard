@@ -157,7 +157,7 @@ const QIG_Dashboard = () => {
   useEffect(() => {
     let isLoggedIn;
     if (typeof window !== "undefined") {
-      isLoggedIn = localStorage.getItem("isSawyerLoggedIn");
+      isLoggedIn = localStorage.getItem("isLoggedIn");
     }
 
     if (isLoggedIn == "false") {

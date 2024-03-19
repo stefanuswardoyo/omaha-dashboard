@@ -58,7 +58,7 @@ export async function alertEmailTypes() {
           (currentTime.getTime() - previousAlertTime.getTime()) / (1000 * 60);
         if (account.Alert == true) {
           if (
-            previousAlertTime.getTime() === 0 ||
+            previousAlertTime.getTime() == 0 ||
             timeDifference > Number(process.env.ALERT_INTERVAL)
           ) {
             sendAlertTypeTwoTargetBalance(account)

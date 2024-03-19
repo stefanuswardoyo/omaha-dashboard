@@ -25,8 +25,8 @@ const Sidebar = () => {
   let AccountOwner = "Accounts";
   if (typeof window !== "undefined") {
     // Use localStorage here
-    if (localStorage.getItem("username") == "support@quantfarming.com")
-      AccountOwner = "Sawyer Accounts";
+    if (localStorage.getItem("username") == "stefanus.wardoyo@gmail.com")
+      AccountOwner = "Stefanus Accounts";
     else AccountOwner = "Accounts";
   }
 
@@ -43,13 +43,13 @@ const Sidebar = () => {
   };
   const handleLogout = () => {
     localStorage.setItem("token", "");
-    localStorage.setItem("isSawyerLoggedIn", "false");
+    localStorage.setItem("isLoggedIn", "false");
     localStorage.setItem("owner", "");
     router.push("/login");
   };
 
-  const handleSawyerBusinessAccounts = () => {
-    localStorage.setItem("owner", "sawyer");
+  const handleStefanusBusinessAccounts = () => {
+    localStorage.setItem("owner", "Stefanus");
     router.push("/dashboard");
   };
 
@@ -88,7 +88,7 @@ const Sidebar = () => {
         <div class="flex flex-col items-center w-full mt-3 border-t border-gray-700">
           <div
             class="flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-700 hover:text-gray-300"
-            onClick={handleSawyerBusinessAccounts}
+            onClick={handleStefanusBusinessAccounts}
           >
             <Image
               src="./img/dashboardIcon.svg"
