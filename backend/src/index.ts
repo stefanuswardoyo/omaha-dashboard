@@ -43,7 +43,7 @@ async function checkIfAdminExist() {
   }
 }
 
-checkIfAdminExist();
+//checkIfAdminExist();
 
 
 app.get("/account/data", async (req: Request, res: Response) => {
