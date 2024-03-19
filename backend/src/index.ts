@@ -67,9 +67,9 @@ app.get("/api/data", (req, res) => {
       if (existingData) {
         // Server number exists, update the values
         existingData.Server = serverNumber as string;
-        existingData.InitialDeposit = req.query.initialDeposit as string;
-        existingData.Balance = req.query.accountBalance as string;
-        existingData.Equity = req.query.accountEquity as string;
+        existingData.InitialDeposit =  String(parseInt(req.query.initialDeposit as string));
+        existingData.Balance = String(parseInt(req.query.accountBalance as string));
+        existingData.Equity = String(parseInt(req.query.accountEquity as string));
         existingData.LastHeartBeat = req.query.lastHeartBeat as string;
         existingData.OpenPositions = req.query.openPositions as string;
         existingData.AccountName = req.query.accountName as string;
@@ -88,9 +88,9 @@ app.get("/api/data", (req, res) => {
         // Server number does not exist, create a new document
         const newData = new Account({
           Server: serverNumber as string,
-          InitialDeposit: req.query.initialDeposit as string,
-          Balance: req.query.accountBalance as string,
-          Equity: req.query.accountEquity as string,
+          InitialDeposit: String(parseInt(req.query.initialDeposit as string)),
+          Balance: String(parseInt(req.query.accountBalance as string)),
+          Equity: String(parseInt(req.query.accountEquity as string)),
           LastHeartBeat: req.query.lastHeartBeat as string,
           OpenPositions: req.query.openPositions as string,
           AccountName: req.query.accountName as string,
