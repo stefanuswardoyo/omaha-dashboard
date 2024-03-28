@@ -4,7 +4,6 @@ import "./page.css";
 import PlaylistAddCheckCircleRoundedIcon from "@mui/icons-material/PlaylistAddCheckCircleRounded";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
-import CandlestickChartIcon from "@mui/icons-material/CandlestickChart";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import PercentIcon from "@mui/icons-material/Percent";
 import InsightsIcon from "@mui/icons-material/Insights";
@@ -19,10 +18,12 @@ import TextField from "@mui/material/TextField";
 import Switch from "@mui/material/Switch";
 import EmailIcon from "@mui/icons-material/Email";
 const moment = require("moment");
+import Image from "next/image";
+import { fabClasses } from "@mui/material";
 require("dotenv").config();
 const server_url = process.env.SERVER_URL;
 
-const QIG_Dashboard = () => {
+const Omaha_Dashboard = () => {
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [Balance, setBalance] = useState([]);
@@ -32,6 +33,7 @@ const QIG_Dashboard = () => {
   const [percentage, setPercentage] = useState([]);
   const [previousPercentage, setPreviousPercentage] = useState([]);
   const [settingPercentage, setSettingPercentage] = useState([]);
+  const [isMounted, setIsMounted] = useState(false);
   const [previousSettingPercentage, setPreviousSettingPercentage] = useState(
     []
   );
@@ -55,6 +57,7 @@ const QIG_Dashboard = () => {
       SettingPercentage: "",
     },
   ]);
+  const [minimizedCards, setMinimizedCards] = useState([]);
 
   const [userServerNumbers, setUserServerNumbers] = useState("");
   let condition = 0;
@@ -81,9 +84,9 @@ const QIG_Dashboard = () => {
             timeDifference: getTimeDifference(item.LastHeartBeat),
           }));
 
-          console.log("Data from Backend (updatedData): ", updatedData);
+          //console.log("Data from Backend (updatedData): ", updatedData);
           setJsonData(updatedData);
-          console.log("updated json: ", updatedData);
+          //console.log("updated json: ", updatedData);
           if (condition === 0) {
             condition = 1;
             const updatedPrevBalance = updatedData.map(
@@ -130,10 +133,11 @@ const QIG_Dashboard = () => {
     };
 
     fetchData();
-
+    setIsMounted(true);
     const interval = setInterval(() => {
       fetchData();
-    }, 2000);
+
+    }, 20000);
 
     return () => {
       clearInterval(interval);
@@ -150,6 +154,20 @@ const QIG_Dashboard = () => {
     }
     return 1;
   };
+  useEffect(() => {
+    if (isMounted) {
+      // Initialize minimizedCards with all values set to true when component mounts
+      setMinimizedCards(new Array(jsonData.length).fill(true));
+    }
+  }, [jsonData, isMounted]);
+
+  const handleMinimizeToggle = (index) => {
+    setMinimizedCards((prevMinimizedCards) => {
+      const updatedMinimizedCards = [...prevMinimizedCards];
+      updatedMinimizedCards[index] = !updatedMinimizedCards[index];
+      return updatedMinimizedCards;
+    });
+  };
 
   useEffect(() => {
     let isLoggedIn;
@@ -161,6 +179,9 @@ const QIG_Dashboard = () => {
       router.push("/login");
     }
   }, [router]);
+  useState(() => {
+    setMinimizedCards(Array(jsonData.length).fill(true));
+  }, []);
 
   function timestampToTime(timestamp) {
     const date = moment(timestamp * 1000).format("MM/DD/YYYY HH:mm:ss");
@@ -502,11 +523,40 @@ const QIG_Dashboard = () => {
     setSettingPercentage(updatedSettingPercentage);
   }
 
+  function confirmDelete(serverNumber) {
+    if (confirm(`Delete ${serverNumber} Account?`)) {
+      // Make HTTP POST request to delete account
+      const url = server_url + "/api/deleteAccount";
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ serverNumber }),
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log('Account deleted:', data);
+          // Handle success response if needed
+        })
+        .catch(error => {
+          console.error('Error deleting account:', error);
+          // Handle error
+        });
+    }
+  }
+
+
   return (
     <>
       <div
         style={{
-          backgroundImage: "url(/img/clientBg.png)",
+          backgroundImage: "url(/img/dashboardBg.png)",
           display: "flex",
           backgroundRepeat: "repeat-y",
           backgroundSize: "cover",
@@ -532,7 +582,7 @@ const QIG_Dashboard = () => {
               item.Server && (
                 <div
                   key={index}
-                  className="detail-card"
+                  className={`detail-card ${minimizedCards[index] ? 'minimized' : ''}`}
                   style={{
                     backgroundColor: "rgba(179, 184, 193, .20)",
                     backdropFilter: "blur(30px)",
@@ -540,6 +590,18 @@ const QIG_Dashboard = () => {
                   }}
                 >
                   <div className="card-row">
+                    <div class="flex flex-col items-end mt-3 border-t border-gray-700">
+                      <div class="flex items-center justify-center w-6 h-6 mt-2 rounded transition-transform transform hover:scale-110" onClick={() => confirmDelete(item.Server)}>
+                        <Image
+                          src="./img/delete.svg"
+                          alt="Delete Icon"
+                          class="w-6 h-6 mr-2"
+                          width="6"
+                          height="6"
+                        />
+                      </div>
+                    </div>
+
                     <div className="row-item">
                       <AccountBalanceIcon
                         style={{ color: "white", fontSize: "20px" }}
@@ -568,9 +630,8 @@ const QIG_Dashboard = () => {
                       <span className="row-label">Connection:</span>
                     </div>
                     <span
-                      className={`row-value line-2 ${
-                        parseInt(item.timeDifference) === -1 ? "red" : "green"
-                      }`}
+                      className={`row-value line-2 ${parseInt(item.timeDifference) === -1 ? "red" : "green"
+                        }`}
                       style={{
                         color:
                           parseInt(item.timeDifference) === -1
@@ -584,314 +645,296 @@ const QIG_Dashboard = () => {
                     </span>
                   </div>
 
-                  <div className="row-divider"></div>
-                  <div className="card-row">
-                    <div className="row-item">
-                      <AccountBalanceWalletIcon
-                        style={{ color: "white", fontSize: "20px" }}
+                  <div class="flex flex-col items-end mt-3 border-t border-gray-700">
+                    <div class="flex items-center justify-center w-6 h-6 mt-2 rounded transition-transform transform hover:scale-110" onClick={() => handleMinimizeToggle(index)}>
+                      <Image
+                        src="./img/minimize.svg"
+                        alt="Delete Icon"
+                        class="w-6 h-6 mr-2"
+                        width="6"
+                        height="6"
                       />
-                      <span className="row-label">Balance:</span>
                     </div>
-                    <span className="row-value">
-                      $
-                      {parseFloat(item.Balance).toLocaleString("en-US", {
-                        minimumFractionDigits: 2,
-                      })}
-                    </span>
                   </div>
 
-                  <div className="row-divider"></div>
-                  <div className="card-row">
-                    <div className="row-item">
-                      <CandlestickChartIcon
-                        style={{ color: "white", fontSize: "20px" }}
-                      />
-                      <span className="row-label">Equity:</span>
-                    </div>
-                    <span
-                      className={`row-value ${
-                        parseFloat(item.Equity) > parseFloat(item.Balance)
-                          ? "dark-green"
-                          : parseFloat(item.Equity) < parseFloat(item.Balance)
-                          ? "red"
-                          : ""
-                      }`}
-                      style={{
-                        color:
-                          parseFloat(item.Equity) > parseFloat(item.Balance)
-                            ? "darkgreen"
-                            : parseFloat(item.Equity) < parseFloat(item.Balance)
-                            ? "red"
-                            : "white",
-                      }}
-                    >
-                      $
-                      {parseFloat(item.Equity).toLocaleString("en-US", {
-                        minimumFractionDigits: 2,
-                      })}
-                    </span>
-                  </div>
+                  {!minimizedCards[index] && (
+                    <>
 
-                  <div className="row-divider"></div>
-                  <div className="card-row">
-                    <div className="row-item">
-                      <PlaylistAddCheckCircleRoundedIcon
-                        style={{ color: "white", fontSize: "20px" }}
-                      />
-                      <span className="row-label">Open Positions:</span>
-                    </div>
-                    <span className="row-value">{item.OpenPositions}</span>
-                  </div>
+                      <div className="row-divider"></div>
+                      <div className="card-row">
+                        <div className="row-item">
+                          <AccountBalanceWalletIcon
+                            style={{ color: "white", fontSize: "20px" }}
+                          />
+                          <span className="row-label">Balance:</span>
+                        </div>
+                        <span className="row-value">
+                          $
+                          {parseFloat(item.Balance).toLocaleString("en-US", {
+                            minimumFractionDigits: 2,
+                          })}
+                        </span>
+                      </div>
 
-                  <div className="row-divider"></div>
-                  <div className="card-row">
-                    <div className="row-item">
-                      <InsightsIcon
-                        style={{ color: "white", fontSize: "20px" }}
-                      />
-                      <span className="row-label">Floating Pnl:</span>
-                    </div>
-                    <span
-                      className={`row-value ${
-                        (
-                          parseFloat(item.Equity) - parseFloat(item.Balance)
-                        ).toFixed(2) > 0
-                          ? "dark-green"
-                          : (
-                              parseFloat(item.Equity) - parseFloat(item.Balance)
-                            ).toFixed(2) < 0
-                          ? "red"
-                          : "white"
-                      }`}
-                      style={{
-                        color:
-                          (
+
+                      <div className="row-divider"></div>
+                      <div className="card-row">
+                        <div className="row-item">
+                          <InsightsIcon
+                            style={{ color: "white", fontSize: "20px" }}
+                          />
+                          <span className="row-label">Floating Pnl:</span>
+                        </div>
+                        <span
+                          className={`row-value ${(
                             parseFloat(item.Equity) - parseFloat(item.Balance)
                           ).toFixed(2) > 0
-                            ? "darkgreen"
+                            ? "dark-green"
                             : (
-                                parseFloat(item.Equity) -
-                                parseFloat(item.Balance)
-                              ).toFixed(2) < 0
-                            ? "red"
-                            : "white",
-                      }}
-                    >
-                      $
-                      {parseFloat(item.Equity - item.Balance).toLocaleString(
-                        "en-US",
-                        { minimumFractionDigits: 2 }
-                      )}
-                    </span>
-                  </div>
-
-                  <div className="row-divider"></div>
-                  <div className="card-row">
-                    <div className="row-item">
-                      <PercentIcon
-                        style={{ color: "white", fontSize: "20px" }}
-                      />
-                      <span className="row-label">Loss Percentage:</span>
-                    </div>
-
-                    <div className="row-value">
-                      <ThemeProvider theme={theme}>
-                        <Box
-                          component="form"
-                          sx={{
-                            "& > :not(style)": { mt: 1, width: "17ch" },
-                            color: "text.primary",
+                              parseFloat(item.Equity) - parseFloat(item.Balance)
+                            ).toFixed(2) < 0
+                              ? "red"
+                              : "white"
+                            }`}
+                          style={{
+                            color:
+                              (
+                                parseFloat(item.Equity) - parseFloat(item.Balance)
+                              ).toFixed(2) > 0
+                                ? "darkgreen"
+                                : (
+                                  parseFloat(item.Equity) -
+                                  parseFloat(item.Balance)
+                                ).toFixed(2) < 0
+                                  ? "red"
+                                  : "white",
                           }}
-                          noValidate
-                          autoComplete="off"
                         >
-                          <TextField
-                            id="outlined-basic"
-                            label="Percentage"
-                            variant="outlined"
-                            value={percentage[index]}
-                            onChange={(event) =>
-                              handlePercentageChange(event, index, 1)
-                            }
-                            onKeyDown={(event) =>
-                              handleKeyPressPercentage(
-                                event,
-                                index,
-                                item.Server
-                              )
-                            }
+                          $
+                          {parseFloat(item.Equity - item.Balance).toLocaleString(
+                            "en-US",
+                            { minimumFractionDigits: 2 }
+                          )}
+                        </span>
+                      </div>
+
+
+
+                      <div className="row-divider"></div>
+                      <div className="card-row">
+                        <div className="row-item">
+                          <PercentIcon
+                            style={{ color: "white", fontSize: "20px" }}
                           />
-                        </Box>
-                      </ThemeProvider>
-                    </div>
-                    <br></br>
-                    <span className="row-value">
-                      Percentage: {previousPercentage[index]}%
-                    </span>
-                  </div>
+                          <span className="row-label">Loss Percentage:</span>
+                        </div>
 
-                  <div className="card-row">
-                    <div className="row-item">
-                      <MonetizationOnIcon
-                        style={{ color: "white", fontSize: "20px" }}
-                      />
-                      <span className="row-label">Target Balance:</span>
-                    </div>
+                        <div className="row-value">
+                          <ThemeProvider theme={theme}>
+                            <Box
+                              component="form"
+                              sx={{
+                                "& > :not(style)": { mt: 1, width: "17ch" },
+                                color: "text.primary",
+                              }}
+                              noValidate
+                              autoComplete="off"
+                            >
+                              <TextField
+                                id="outlined-basic"
+                                label="Percentage"
+                                variant="outlined"
+                                value={percentage[index]}
+                                onChange={(event) =>
+                                  handlePercentageChange(event, index, 1)
+                                }
+                                onKeyDown={(event) =>
+                                  handleKeyPressPercentage(
+                                    event,
+                                    index,
+                                    item.Server
+                                  )
+                                }
+                              />
+                            </Box>
+                          </ThemeProvider>
+                        </div>
+                        <br></br>
+                        <span className="row-value">
+                          Percentage: {previousPercentage[index]}%
+                        </span>
+                      </div>
 
-                    <div className="row-value">
-                      <ThemeProvider theme={theme}>
-                        <Box
-                          component="form"
-                          sx={{
-                            "& > :not(style)": { mt: 1, width: "17ch" },
-                            color: "text.primary",
-                          }}
-                          noValidate
-                          autoComplete="off"
-                        >
-                          <TextField
-                            id="outlined-basic"
-                            label="Balance"
-                            variant="outlined"
-                            value={Balance[index]}
-                            onChange={(event) =>
-                              handleBalanceChange(event, index, 1)
-                            }
-                            onKeyDown={(event) =>
-                              handleKeyPress(event, index, item.Server)
-                            }
+                      <div className="card-row">
+                        <div className="row-item">
+                          <MonetizationOnIcon
+                            style={{ color: "white", fontSize: "20px" }}
                           />
-                        </Box>
-                      </ThemeProvider>
-                    </div>
-                    <br></br>
-                    <span className="row-value">
-                      Target: $
-                      {parseFloat(previousBalance[index]).toLocaleString(
-                        "en-US",
-                        { minimumFractionDigits: 2 }
-                      )}
-                    </span>
-                  </div>
-                  <div className="row-divider"></div>
-                  <div className="card-row">
-                    <div className="row-item">
-                      <PercentIcon
-                        style={{ color: "white", fontSize: "20px" }}
-                      />
-                      <span className="row-label">Setting Percentage:</span>
-                    </div>
+                          <span className="row-label">Target Balance:</span>
+                        </div>
 
-                    <div className="row-value">
-                      <ThemeProvider theme={theme}>
-                        <Box
-                          component="form"
-                          sx={{
-                            "& > :not(style)": { mt: 1, width: "17ch" },
-                            color: "text.primary",
-                          }}
-                          noValidate
-                          autoComplete="off"
-                        >
-                          <TextField
-                            id="outlined-basic"
-                            label="Percentage"
-                            variant="outlined"
-                            value={settingPercentage[index]}
-                            onChange={(event) =>
-                              handlePercentageChange(event, index, 2)
-                            }
-                            onKeyDown={(event) =>
-                              handleKeyPressSettingPercentage(
-                                event,
-                                index,
-                                item.Server
-                              )
-                            }
+                        <div className="row-value">
+                          <ThemeProvider theme={theme}>
+                            <Box
+                              component="form"
+                              sx={{
+                                "& > :not(style)": { mt: 1, width: "17ch" },
+                                color: "text.primary",
+                              }}
+                              noValidate
+                              autoComplete="off"
+                            >
+                              <TextField
+                                id="outlined-basic"
+                                label="Balance"
+                                variant="outlined"
+                                value={Balance[index]}
+                                onChange={(event) =>
+                                  handleBalanceChange(event, index, 1)
+                                }
+                                onKeyDown={(event) =>
+                                  handleKeyPress(event, index, item.Server)
+                                }
+                              />
+                            </Box>
+                          </ThemeProvider>
+                        </div>
+                        <br></br>
+                        <span className="row-value">
+                          Target: $
+                          {parseFloat(previousBalance[index]).toLocaleString(
+                            "en-US",
+                            { minimumFractionDigits: 2 }
+                          )}
+                        </span>
+                      </div>
+
+
+                      <div className="row-divider"></div>
+                      <div className="card-row">
+                        <div className="row-item">
+                          <PercentIcon
+                            style={{ color: "white", fontSize: "20px" }}
                           />
-                        </Box>
-                      </ThemeProvider>
-                    </div>
-                    <br></br>
-                    <span className="row-value">
-                      Setting Percentage: {previousSettingPercentage[index]}%
-                    </span>
-                  </div>
+                          <span className="row-label">Setting Percentage:</span>
+                        </div>
 
-                  <div className="card-row">
-                    <div className="row-item">
-                      <MonetizationOnIcon
-                        style={{ color: "white", fontSize: "20px" }}
-                      />
-                      <span className="row-label">Setting Balance:</span>
-                    </div>
+                        <div className="row-value">
+                          <ThemeProvider theme={theme}>
+                            <Box
+                              component="form"
+                              sx={{
+                                "& > :not(style)": { mt: 1, width: "17ch" },
+                                color: "text.primary",
+                              }}
+                              noValidate
+                              autoComplete="off"
+                            >
+                              <TextField
+                                id="outlined-basic"
+                                label="Percentage"
+                                variant="outlined"
+                                value={settingPercentage[index]}
+                                onChange={(event) =>
+                                  handlePercentageChange(event, index, 2)
+                                }
+                                onKeyDown={(event) =>
+                                  handleKeyPressSettingPercentage(
+                                    event,
+                                    index,
+                                    item.Server
+                                  )
+                                }
+                              />
+                            </Box>
+                          </ThemeProvider>
+                        </div>
+                        <br></br>
+                        <span className="row-value">
+                          Setting Percentage: {previousSettingPercentage[index]}%
+                        </span>
+                      </div>
 
-                    <div className="row-value">
-                      <ThemeProvider theme={theme}>
-                        <Box
-                          component="form"
-                          sx={{
-                            "& > :not(style)": { mt: 1, width: "17ch" },
-                            color: "text.primary",
-                          }}
-                          noValidate
-                          autoComplete="off"
-                        >
-                          <TextField
-                            id="outlined-basic"
-                            label="Balance"
-                            variant="outlined"
-                            value={settingBalance[index]}
-                            onChange={(event) =>
-                              handleBalanceChange(event, index, 2)
-                            }
-                            onKeyDown={(event) =>
-                              handleSettingBalanceKeyPress(
-                                event,
-                                index,
-                                item.Server
-                              )
-                            }
+                      <div className="card-row">
+                        <div className="row-item">
+                          <MonetizationOnIcon
+                            style={{ color: "white", fontSize: "20px" }}
                           />
-                        </Box>
-                      </ThemeProvider>
-                    </div>
-                    <br></br>
-                    <span className="row-value">
-                      Setting Balance: $
-                      {parseFloat(previousSettingBalance[index]).toLocaleString(
-                        "en-US",
-                        { minimumFractionDigits: 2 }
-                      )}
-                    </span>
-                  </div>
-                  <div className="row-divider"></div>
-                  <div className="card-row">
-                    <div className="row-item">
-                      <BrowserUpdatedIcon
-                        style={{ color: "white", fontSize: "20px" }}
-                      />
-                      <span className="row-label">Last Data Updated:</span>
-                    </div>
-                    <span className="row-value">
-                      {timestampToTime(item.LastHeartBeat)}
-                    </span>
-                  </div>
+                          <span className="row-label">Setting Balance:</span>
+                        </div>
 
-                  <div className="row-divider"></div>
-                  <div className="card-row">
-                    <div className="row-item">
-                      <EmailIcon style={{ color: "white", fontSize: "20px" }} />
-                      <span className="row-label">Alert:</span>
-                    </div>
-                    <div className="row-value">
-                      <Switch
-                        checked={alert[index]}
-                        onClick={() => handleAlert(index, item.Server)}
-                      />
-                    </div>
-                  </div>
+                        <div className="row-value">
+                          <ThemeProvider theme={theme}>
+                            <Box
+                              component="form"
+                              sx={{
+                                "& > :not(style)": { mt: 1, width: "17ch" },
+                                color: "text.primary",
+                              }}
+                              noValidate
+                              autoComplete="off"
+                            >
+                              <TextField
+                                id="outlined-basic"
+                                label="Balance"
+                                variant="outlined"
+                                value={settingBalance[index]}
+                                onChange={(event) =>
+                                  handleBalanceChange(event, index, 2)
+                                }
+                                onKeyDown={(event) =>
+                                  handleSettingBalanceKeyPress(
+                                    event,
+                                    index,
+                                    item.Server
+                                  )
+                                }
+                              />
+                            </Box>
+                          </ThemeProvider>
+                        </div>
+                        <br></br>
+                        <span className="row-value">
+                          Setting Balance: $
+                          {parseFloat(previousSettingBalance[index]).toLocaleString(
+                            "en-US",
+                            { minimumFractionDigits: 2 }
+                          )}
+                        </span>
+                      </div>
+                      <div className="row-divider"></div>
+                      <div className="card-row">
+                        <div className="row-item">
+                          <BrowserUpdatedIcon
+                            style={{ color: "white", fontSize: "20px" }}
+                          />
+                          <span className="row-label">Last Data Updated:</span>
+                        </div>
+                        <span className="row-value">
+                          {timestampToTime(item.LastHeartBeat)}
+                        </span>
+                      </div>
+
+
+
+                      <div className="row-divider"></div>
+                      <div className="card-row">
+                        <div className="row-item">
+                          <EmailIcon style={{ color: "white", fontSize: "20px" }} />
+                          <span className="row-label">Alert:</span>
+                        </div>
+                        <div className="row-value">
+                          <Switch
+                            checked={alert[index]}
+                            onClick={() => handleAlert(index, item.Server)}
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
+
                 </div>
+
               )
           )}
         </div>
@@ -900,4 +943,4 @@ const QIG_Dashboard = () => {
   );
 };
 
-export default QIG_Dashboard;
+export default Omaha_Dashboard;

@@ -4,11 +4,10 @@ import cors from "cors";
 import * as jwt from "jsonwebtoken";
 import connectDB from "./db";
 import Account from "../src/models/account";
-import User from "./models/User";
 import Admin from "./models/Admin";
 const bcrypt = require("bcryptjs");
 import dotenv from "dotenv";
-import {alertEmailTypes}  from "./emailAlerts";
+import { alertEmailTypes } from "./emailAlerts";
 dotenv.config();
 const tokenJwt: string = process.env.JWT_TOKEN || "JxVmG85yEnYrXQq3rTfTjzKZcTgRGsRw";
 const app = express();
@@ -343,6 +342,46 @@ app.post("/api/updateSettingBalance", async (req, res) => {
   }
 });
 
+app.post("/api/deleteAccount", async (req, res) => {
+  try {
+    const { serverNumber } = req.body;
+    console.log(serverNumber)
+    // Find and delete the account with the matching serverNumber
+    const deletedAccount = await Account.findOneAndDelete({ Server: serverNumber  });
+
+    if (!deletedAccount) {
+      return res.status(404).json({ message: 'Account not found' });
+    }
+    res.status(200).json({ message: 'Account deleted successfully' });
+  } catch (error) {
+    console.error("Error occurred while deleting the account:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+app.get("/api/serverData", async (req, res) => {
+
+  const serverNumber = req.query.serverNumber as string;
+  const dataType = req.query.dataType as string;
+  Account.findOne({ Server: serverNumber })
+    .then((existingData) => {
+
+      if (dataType == "SettingBalance")
+        res.send(existingData.SettingBalance);
+      if (dataType == "SettingPercentage")
+        res.send(existingData.SettingPercentage);
+      if (dataType == "ProfitPercentage")
+        res.send(existingData.ProfitPercentage);
+      if (dataType == "TargetBalance")
+        res.send(existingData.TargetBalance);
+    })
+    .catch((error) => {
+      console.error("Error checking server number:", error);
+      res.send(-1)
+    });
+
+});
+
 app.post("/reset-password", authenticateToken, async (req, res) => {
   const { username, oldPassword, newPassword, confirmPassword } = req.body;
   console.log(username, oldPassword, newPassword, confirmPassword);
@@ -408,4 +447,4 @@ app.listen(port, () => {
 
 
 
-setInterval(alertEmailTypes, 60 * 1000); // 60 seconds * 1000 milliseconds
+//setInterval(alertEmailTypes, 60 * 1000); // 60 seconds * 1000 milliseconds

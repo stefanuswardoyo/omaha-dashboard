@@ -96,7 +96,7 @@ const NewLogin = () => {
 
   return (
     <div
-      className="w-screen h-screen bg-cover bg-no-repeat bg-[url('/img/clientBg.png')] bg-[right] "
+      className="w-screen h-screen bg-cover bg-no-repeat bg-[url('/img/clientBg.jpg')] bg-[right] "
       style={{
         position: "relative",
       }}
