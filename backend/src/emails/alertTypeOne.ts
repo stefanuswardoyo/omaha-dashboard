@@ -86,19 +86,31 @@ export async function sendAlertTypeOne(jsonData: any): Promise<void> {
           <tr>
           <th>Account Balance</th>
           <td>${parseFloat(Balance).toLocaleString("en-US", {
-            minimumFractionDigits: 2,
-          })}</td>
+      minimumFractionDigits: 2,
+    })}</td>
         </tr>
         <tr>
-          <th>Account Equity</th>
-          <td>${parseFloat(Equity).toLocaleString("en-US", {
-            minimumFractionDigits: 2,
-          })}</td>
+        <th>Account PnL</th>
+        <td>${(parseFloat(Equity) - parseFloat(Balance)).toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    })}</td>
+      </tr>
+      <tr>
+      <th>Percentage PnL</th>
+      <td>${((parseFloat(Balance) - parseFloat(Equity)) / parseFloat(Balance) * 100).toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    })}%</td>
         </tr>
           <tr>
             <th>Open Positions</th>
             <td>${OpenPositions}</td>
           </tr>
+          <tr>
+        <th>Time GMT</th>
+          <td>${new Date().toUTCString()}</td>
+        </tr>
         </table>
       </body>
     </html>

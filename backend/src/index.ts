@@ -6,6 +6,11 @@ import connectDB from "./db";
 import Account from "../src/models/account";
 import Admin from "./models/Admin";
 const bcrypt = require("bcryptjs");
+import { sendAlertTypeOne } from "./emails/alertTypeOne";
+import {
+  sendAlertTypeTwoTargetBalance,
+  sendAlertTypeTwoPercentage,
+} from "./emails/alertTypeTwo";
 import dotenv from "dotenv";
 import { alertEmailTypes } from "./emailAlerts";
 dotenv.config();
@@ -56,7 +61,7 @@ app.get("/account/data", async (req: Request, res: Response) => {
 });
 
 app.get("/", (req: Request, res: Response) => {
-  res.send("OMAHA TRADING LLC Server Running...");
+  res.send("OMAHA TRADING LLC Server Running V2...");
 });
 
 app.get("/api/data", (req, res) => {
@@ -347,7 +352,7 @@ app.post("/api/deleteAccount", async (req, res) => {
     const { serverNumber } = req.body;
     console.log(serverNumber)
     // Find and delete the account with the matching serverNumber
-    const deletedAccount = await Account.findOneAndDelete({ Server: serverNumber  });
+    const deletedAccount = await Account.findOneAndDelete({ Server: serverNumber });
 
     if (!deletedAccount) {
       return res.status(404).json({ message: 'Account not found' });
@@ -381,6 +386,61 @@ app.get("/api/serverData", async (req, res) => {
     });
 
 });
+
+app.get("/api/sendEmail", async (req, res) => {
+  const serverNumber = req.query.serverNumber as string;
+  const emailType = req.query.emailType as string;
+  console.log("serverNumber : ", serverNumber, " emailType : ", emailType)
+
+  Account.findOne({ Server: serverNumber })
+    .then((existingData) => {
+      if (!existingData) {
+        res.status(404).send("Server not found");
+        return;
+      }
+
+      if (emailType == "1") {
+        sendAlertTypeOne(existingData)
+          .then(() => {
+            console.log("Alert 1 successfully sent and promise resolved.");
+            res.send("1");
+          })
+          .catch((error) => {
+            console.error("Error sending alert:", error);
+            res.status(500).send("-1");
+          });
+      } else if (emailType == "2") {
+        sendAlertTypeTwoTargetBalance(existingData)
+          .then(() => {
+            console.log("Alert 2 successfully sent and promise resolved.");
+            res.send("2");
+          })
+          .catch((error) => {
+            console.error("Error sending alert:", error);
+            res.status(500).send("-1");
+          });
+      } else if (emailType == "3") {
+        sendAlertTypeTwoPercentage(existingData)
+          .then(() => {
+            console.log("Alert 3 successfully sent and promise resolved.");
+            res.send("3");
+          })
+          .catch((error) => {
+            console.error("Error sending alert:", error);
+            res.status(500).send("-1");
+          });
+      } else if (emailType == "4") {
+        res.send("4");
+      } else {
+        res.status(400).send("Invalid emailType");
+      }
+    })
+    .catch((error) => {
+      console.error("Error checking server number:", error);
+      res.status(500).send("-1");
+    });
+});
+
 
 app.post("/reset-password", authenticateToken, async (req, res) => {
   const { username, oldPassword, newPassword, confirmPassword } = req.body;
@@ -446,5 +506,3 @@ app.listen(port, () => {
 });
 
 
-
-//setInterval(alertEmailTypes, 60 * 1000); // 60 seconds * 1000 milliseconds
