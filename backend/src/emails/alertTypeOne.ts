@@ -98,7 +98,7 @@ export async function sendAlertTypeOne(jsonData: any): Promise<void> {
       </tr>
       <tr>
       <th>Percentage PnL</th>
-      <td>${((parseFloat(Balance) - parseFloat(Equity)) / parseFloat(Balance) * 100).toLocaleString("en-US", {
+      <td>${((parseFloat(Equity) - parseFloat(Balance)) / parseFloat(Balance) * 100).toLocaleString("en-US", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     })}%</td>

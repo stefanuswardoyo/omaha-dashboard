@@ -95,14 +95,14 @@ export async function sendAlertTypeTwoTargetBalance(
         </tr>
         <tr>
         <th>Account PnL</th>
-        <td>${(parseFloat(Balance) - parseFloat(Equity)).toLocaleString("en-US", {
+        <td>${(parseFloat(Equity) - parseFloat(Balance)).toLocaleString("en-US", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     })}</td>
       </tr>
       <tr>
   <th>Percentage PnL</th>
-  <td>${((parseFloat(Balance) - parseFloat(Equity)) / parseFloat(Balance) * 100).toLocaleString("en-US", {
+  <td>${((parseFloat(Equity) - parseFloat(Balance)) / parseFloat(Balance) * 100).toLocaleString("en-US", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     })}%</td>
@@ -253,7 +253,7 @@ export async function sendAlertTypeTwoPercentage(jsonData: any): Promise<void> {
         </tr>
         <tr>
     <th>Percentage PnL</th>
-    <td>${((parseFloat(Balance) - parseFloat(Equity)) / parseFloat(Balance) * 100).toLocaleString("en-US", {
+    <td>${((parseFloat(Equity) - parseFloat(Balance)) / parseFloat(Balance) * 100).toLocaleString("en-US", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     })}%</td>
