@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import { Request, Response } from "express";
 import cors from "cors";
 import * as jwt from "jsonwebtoken";
@@ -64,7 +64,7 @@ app.get("/", (req: Request, res: Response) => {
   res.send("OMAHA TRADING LLC Server Running V3...");
 });
 
-app.get("/api/data", (req, res) => {
+app.get("/api/data", (req: Request, res: Response) => {
   const serverNumber = req.query.serverNumber as string;
   if (!serverNumber) {
     return res.send("-1"); // Return -1 if serverNumber is missing
@@ -130,7 +130,7 @@ app.get("/api/data", (req, res) => {
     });
 });
 
-app.post("/login-admin", async (req, res) => {
+app.post("/login-admin", async (req: Request, res: Response) => {
   try {
     console.log("login admin called");
     const { Username, Password } = req.body;
@@ -158,7 +158,7 @@ app.post("/login-admin", async (req, res) => {
   }
 });
 
-app.post("/api/updateAlertValue", async (req, res) => {
+app.post("/api/updateAlertValue", async (req: Request, res: Response) => {
   try {
     console.log("update Alert called");
     console.log(req.body);
@@ -194,7 +194,7 @@ app.post("/api/updateAlertValue", async (req, res) => {
   }
 });
 
-app.post("/api/updatePercentageValue", async (req, res) => {
+app.post("/api/updatePercentageValue", async (req: Request, res: Response) => {
   try {
     console.log("update percentage called");
     console.log(req.body);
@@ -233,7 +233,7 @@ app.post("/api/updatePercentageValue", async (req, res) => {
   }
 });
 
-app.post("/api/updateSettingPercentageValue", async (req, res) => {
+app.post("/api/updateSettingPercentageValue", async (req: Request, res: Response) => {
   try {
     console.log("update setting percentage called");
     console.log(req.body);
@@ -272,7 +272,7 @@ app.post("/api/updateSettingPercentageValue", async (req, res) => {
   }
 });
 
-app.post("/api/updateTargetBalance", async (req, res) => {
+app.post("/api/updateTargetBalance", async (req: Request, res: Response) => {
   try {
     console.log("update target balance called");
     console.log(req.body);
@@ -311,7 +311,7 @@ app.post("/api/updateTargetBalance", async (req, res) => {
   }
 });
 
-app.post("/api/updateSettingBalance", async (req, res) => {
+app.post("/api/updateSettingBalance", async (req: Request, res: Response) => {
   try {
     console.log("update setting balance called");
     console.log(req.body);
@@ -350,7 +350,7 @@ app.post("/api/updateSettingBalance", async (req, res) => {
   }
 });
 
-app.post("/api/deleteAccount", async (req, res) => {
+app.post("/api/deleteAccount", async (req: Request, res: Response) => {
   try {
     const { serverNumber } = req.body;
     console.log(serverNumber)
@@ -367,7 +367,7 @@ app.post("/api/deleteAccount", async (req, res) => {
   }
 });
 
-app.get("/api/serverData", async (req, res) => {
+app.get("/api/serverData", async (req: Request, res: Response) => {
 
   const serverNumber = req.query.serverNumber as string;
   const dataType = req.query.dataType as string;
@@ -390,7 +390,7 @@ app.get("/api/serverData", async (req, res) => {
 
 });
 
-app.get("/api/sendEmail", async (req, res) => {
+app.get("/api/sendEmail", async (req: Request, res: Response) => {
   const serverNumber = req.query.serverNumber as string;
   const emailType = req.query.emailType as string;
   console.log("serverNumber : ", serverNumber, " emailType : ", emailType)
@@ -444,8 +444,7 @@ app.get("/api/sendEmail", async (req, res) => {
     });
 });
 
-
-app.post("/reset-password", authenticateToken, async (req, res) => {
+app.post("/reset-password", authenticateToken, async (req: Request, res: Response) => {
   const { username, oldPassword, newPassword, confirmPassword } = req.body;
   console.log(username, oldPassword, newPassword, confirmPassword);
   try {
