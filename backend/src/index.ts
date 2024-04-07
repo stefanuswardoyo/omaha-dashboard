@@ -61,11 +61,14 @@ app.get("/account/data", async (req: Request, res: Response) => {
 });
 
 app.get("/", (req: Request, res: Response) => {
-  res.send("OMAHA TRADING LLC Server Running V2...");
+  res.send("OMAHA TRADING LLC Server Running V3...");
 });
 
 app.get("/api/data", (req, res) => {
   const serverNumber = req.query.serverNumber as string;
+  if (!serverNumber) {
+    return res.send("-1"); // Return -1 if serverNumber is missing
+  }
   Account.findOne({ Server: serverNumber })
     .then((existingData) => {
       if (existingData) {
