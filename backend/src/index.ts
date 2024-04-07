@@ -1,5 +1,4 @@
 import express, { Request, Response } from "express";
-import { Request, Response } from "express";
 import cors from "cors";
 import * as jwt from "jsonwebtoken";
 import connectDB from "./db";
