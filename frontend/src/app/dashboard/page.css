@@ -17,7 +17,7 @@
   transition: height 0.3s ease; /* Add transition for smoother height change */
 }
 .minimized {
-  height: 350px; /* Adjust the height when card is minimized */
+  height: 480px; /* Adjust the height when card is minimized */
 }
 .card-row {
   justify-content: space-between;

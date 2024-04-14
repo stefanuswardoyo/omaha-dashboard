@@ -13,11 +13,11 @@ import {
 import dotenv from "dotenv";
 import { alertEmailTypes } from "./emailAlerts";
 dotenv.config();
-const tokenJwt: string = process.env.JWT_TOKEN || "JxVmG85yEnYrXQq3rTfTjzKZcTgRGsRw";
+const tokenJwt: string = process.env.JWT_TOKEN;
 const app = express();
 app.use(cors()); // Enable CORS for all routes
 app.use(express.json());
-const port = process.env.PORT || 8000;
+const port = process.env.PORT ;
 // Connect to MongoDB
 connectDB();
 
@@ -47,8 +47,55 @@ async function checkIfAdminExist() {
 }
 
 //checkIfAdminExist();
+app.use(express.json());
+
+function authenticateToken(req: any, res: any, next: any) {
+  const token = req.headers.authorization && req.headers.authorization.split(" ")[1];
+  console.log("Authorization header:", req.headers.authorization);
 
 
+  if (!token) {
+    console.error("No token provided");
+    return res.sendStatus(401);
+  }
+  
+  jwt.verify(token, tokenJwt, (err: any, decodedToken: any) => {
+    if (err) {
+      console.error("Error verifying JWT token:", err);
+      return res.sendStatus(403);
+    }
+  
+    console.log("Decoded JWT token:", decodedToken);
+    req.user = decodedToken;
+    next();
+  });
+}
+app.post("/login-admin", async (req: Request, res: Response) => {
+  try {
+    console.log("login admin called");
+    const { Username, Password } = req.body;
+    console.log(req.body);
+    console.log("login admin called ");
+
+    const admin = await Admin.findOne({ Username });
+    if (!admin) {
+      return res.status(404).json({ msg: "Admin does not exists" });
+    }
+
+    // Check if password is correct
+    const isMatch = await bcrypt.compare(Password, admin.Password);
+    if (!isMatch) {
+      return res.status(401).json({ msg: "Invalid credentials" });
+    }
+
+    const token = jwt.sign({ id: admin.id }, tokenJwt, { expiresIn: '1h' }); 
+    res.status(200).json({ msg: "Login Successful", token: token });
+  } catch (err) {
+    console.error(err);
+    console.log("error is:", err);
+    res.status(500).json({ msg: "Server error" });
+  }
+});
 app.get("/account/data", async (req: Request, res: Response) => {
   try {
     const data = await Account.find();
@@ -56,6 +103,39 @@ app.get("/account/data", async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Error retrieving data:", error);
     res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+app.post("/api/updateAlertValue",authenticateToken, async (req: Request, res: Response) => {
+  try {
+    console.log("update Alert called");
+    console.log(req.body);
+    const serverNumber = req.body.username;
+    Account.findOne({ Server: serverNumber })
+      .then((account) => {
+        if (account) {
+          account.Alert = req.body.percent;
+          return account.save();
+        } else {
+          res.status(404).json({ message: "Account not found" });
+        }
+      })
+      .then((updatedAccount) => {
+        if (updatedAccount) {
+          accountData.forEach((user) => {
+            if (user.Server === serverNumber) {
+              user.Alert = req.body.percent;
+            }
+          });
+          res.status(200).json({ message: "Account updated successfully" });
+        }
+      })
+      .catch((error) => {
+        console.error("Error occurred while updating account alert:", error);
+        res.status(500).json({ message: "Internal Server Error" });
+      });
+  } catch (error) {
+    console.error("Error occurred while updating account alert:", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 });
 
@@ -85,7 +165,7 @@ app.get("/api/data", (req: Request, res: Response) => {
           .save()
           .then((updatedData) => {
             //console.log('Data updated:', updatedData);
-            res.send("1");
+            res.sendStatus(200);
           })
           .catch((error) => {
             console.error("Error updating data:", error);
@@ -117,7 +197,7 @@ app.get("/api/data", (req: Request, res: Response) => {
           .save()
           .then((savedData) => {
             console.log("Data saved:", savedData);
-            res.send(1);
+            res.sendStatus(200);
           })
           .catch((error) => {
             console.error("Error saving data:", error);
@@ -129,71 +209,11 @@ app.get("/api/data", (req: Request, res: Response) => {
     });
 });
 
-app.post("/login-admin", async (req: Request, res: Response) => {
-  try {
-    console.log("login admin called");
-    const { Username, Password } = req.body;
-    console.log(req.body);
-    console.log("login admin called ");
 
-    const admin = await Admin.findOne({ Username });
-    if (!admin) {
-      return res.status(404).json({ msg: "Admin does not exists" });
-    }
 
-    // Check if password is correct
-    const isMatch = await bcrypt.compare(Password, admin.Password);
-    if (!isMatch) {
-      return res.status(401).json({ msg: "Invalid credentials" });
-    }
 
-    // Create and sign JWT
-    const token = jwt.sign({ id: admin.id }, tokenJwt);
-    res.status(200).json({ msg: "Login Successful", token: token });
-  } catch (err) {
-    console.error(err);
-    console.log("error is:", err);
-    res.status(500).json({ msg: "Server error" });
-  }
-});
 
-app.post("/api/updateAlertValue", async (req: Request, res: Response) => {
-  try {
-    console.log("update Alert called");
-    console.log(req.body);
-    const serverNumber = req.body.username;
-    Account.findOne({ Server: serverNumber })
-      .then((account) => {
-        if (account) {
-          account.Alert = req.body.percent;
-          return account.save();
-        } else {
-          console.log("Account not found");
-          res.status(404).send("Account not found");
-        }
-      })
-      .then((updatedAccount) => {
-        if (updatedAccount) {
-          console.log("Account alert updated successfully:", updatedAccount);
-          accountData.forEach((user) => {
-            if (user.Server === serverNumber) {
-              user.Alert = req.body.percent;
-            }
-          });
-          res.status(200).send("Account updated successfully");
-        }
-      })
-      .catch((error) => {
-        console.error("Error occurred while updating account alert:", error);
-        res.status(500).send("Internal Server Error");
-      });
-  } catch (error) {
-    console.error("Error occurred while updating account alert:", error);
-    res.status(500).send("Internal Server Error");
-  }
-});
-
-app.post("/api/updatePercentageValue", async (req: Request, res: Response) => {
+app.post("/api/updatePercentageValue",authenticateToken, async (req: Request, res: Response) => {
   try {
     console.log("update percentage called");
     console.log(req.body);
@@ -204,35 +224,30 @@ app.post("/api/updatePercentageValue", async (req: Request, res: Response) => {
           account.ProfitPercentage = req.body.percent.toString();
           return account.save();
         } else {
-          console.log("Account not found");
-          res.status(404).send("Account not found");
+          res.status(404).json({ message: "Account not found" });
         }
       })
       .then((updatedAccount) => {
         if (updatedAccount) {
-          console.log(
-            "Account profit percentage updated successfully",
-            updatedAccount
-          );
           accountData.forEach((user) => {
             if (user.Server === serverNumber) {
               user.ProfitPercentage = req.body.percent;
             }
           });
-          res.status(200).send("Account updated successfully");
+          res.status(200).json({ message: "Percentage value updated" });
         }
       })
       .catch((error) => {
         console.error("Error occurred while updating account alert:", error);
-        res.status(500).send("Internal Server Error");
+        res.status(500).json({ message: "Internal Server Error" });
       });
   } catch (error) {
     console.error("Error occurred while updating account alert:", error);
-    res.status(500).send("Internal Server Error");
+    res.status(500).json({ message: "Internal Server Error" });
   }
 });
 
-app.post("/api/updateSettingPercentageValue", async (req: Request, res: Response) => {
+app.post("/api/updateSettingPercentageValue",authenticateToken, async (req: Request, res: Response) => {
   try {
     console.log("update setting percentage called");
     console.log(req.body);
@@ -243,35 +258,30 @@ app.post("/api/updateSettingPercentageValue", async (req: Request, res: Response
           account.SettingPercentage = req.body.percent.toString();
           return account.save();
         } else {
-          console.log("Account not found");
-          res.status(404).send("Account not found");
+          res.status(404).json({ message: "Account not found" });
         }
       })
       .then((updatedAccount) => {
         if (updatedAccount) {
-          console.log(
-            "Account setting percentage updated successfully",
-            updatedAccount
-          );
           accountData.forEach((user) => {
             if (user.Server === serverNumber) {
               user.SettingPercentage = req.body.percent;
             }
           });
-          res.status(200).send("Account updated successfully");
+          res.status(200).json({ message: "Setting percentave updated" });
         }
       })
       .catch((error) => {
         console.error("Error occurred while updating account alert:", error);
-        res.status(500).send("Internal Server Error");
+        res.status(500).json({ message: "Internal Server Error" });
       });
   } catch (error) {
     console.error("Error occurred while updating account alert:", error);
-    res.status(500).send("Internal Server Error");
+    res.status(500).json({ message: "Internal Server Error" });
   }
 });
 
-app.post("/api/updateTargetBalance", async (req: Request, res: Response) => {
+app.post("/api/updateTargetBalance",authenticateToken, async (req: Request, res: Response) => {
   try {
     console.log("update target balance called");
     console.log(req.body);
@@ -282,35 +292,28 @@ app.post("/api/updateTargetBalance", async (req: Request, res: Response) => {
           account.TargetBalance = req.body.percent.toString();
           return account.save();
         } else {
-          console.log("Account not found");
-          res.status(404).send("Account not found");
+          res.status(404).json({ message: "Account not found" });
         }
       })
       .then((updatedAccount) => {
         if (updatedAccount) {
-          console.log(
-            "Account target balance updated successfully:",
-            updatedAccount
-          );
           accountData.forEach((user) => {
             if (user.Server === serverNumber) {
               user.TargetBalance = req.body.percent;
             }
           });
-          res.status(200).send("Account updated successfully");
+          res.status(200).json({ message: "Traget Balance Updated" });
         }
       })
       .catch((error) => {
-        console.error("Error occurred while updating account alert:", error);
-        res.status(500).send("Internal Server Error");
+        res.status(500).json({ message: "Internal Server Error" });
       });
   } catch (error) {
-    console.error("Error occurred while updating account alert:", error);
     res.status(500).send("Internal Server Error");
   }
 });
 
-app.post("/api/updateSettingBalance", async (req: Request, res: Response) => {
+app.post("/api/updateSettingBalance",authenticateToken, async (req: Request, res: Response) => {
   try {
     console.log("update setting balance called");
     console.log(req.body);
@@ -322,34 +325,30 @@ app.post("/api/updateSettingBalance", async (req: Request, res: Response) => {
           return account.save();
         } else {
           console.log("Account not found");
-          res.status(404).send("Account not found");
+          res.status(404).json({ message: "Account not found" });
         }
       })
       .then((updatedAccount) => {
         if (updatedAccount) {
-          console.log(
-            "Account setting balance updated successfully:",
-            updatedAccount
-          );
           accountData.forEach((user) => {
             if (user.Server === serverNumber) {
               user.SettingBalance = req.body.percent;
             }
           });
-          res.status(200).send("Account updated successfully");
+          res.status(200).json({ message: "Account updated successfully" });
         }
       })
       .catch((error) => {
         console.error("Error occurred while updating account alert:", error);
-        res.status(500).send("Internal Server Error");
+        res.status(500).json({ message: "Internal Server Error" });
       });
   } catch (error) {
     console.error("Error occurred while updating account alert:", error);
-    res.status(500).send("Internal Server Error");
+    res.status(500).json({ message: "Internal Server Error" });
   }
 });
 
-app.post("/api/deleteAccount", async (req: Request, res: Response) => {
+app.post("/api/deleteAccount",authenticateToken, async (req: Request, res: Response) => {
   try {
     const { serverNumber } = req.body;
     console.log(serverNumber)
@@ -362,7 +361,7 @@ app.post("/api/deleteAccount", async (req: Request, res: Response) => {
     res.status(200).json({ message: 'Account deleted successfully' });
   } catch (error) {
     console.error("Error occurred while deleting the account:", error);
-    res.status(500).send("Internal Server Error");
+    res.status(500).json({ message: "Internal Server Error" });
   }
 });
 
@@ -405,7 +404,7 @@ app.get("/api/sendEmail", async (req: Request, res: Response) => {
         sendAlertTypeOne(existingData)
           .then(() => {
             console.log("Alert 1 successfully sent and promise resolved.");
-            res.send("1");
+            res.sendStatus(200);
           })
           .catch((error) => {
             console.error("Error sending alert:", error);
@@ -415,7 +414,7 @@ app.get("/api/sendEmail", async (req: Request, res: Response) => {
         sendAlertTypeTwoTargetBalance(existingData)
           .then(() => {
             console.log("Alert 2 successfully sent and promise resolved.");
-            res.send("2");
+            res.sendStatus(200);
           })
           .catch((error) => {
             console.error("Error sending alert:", error);
@@ -425,14 +424,14 @@ app.get("/api/sendEmail", async (req: Request, res: Response) => {
         sendAlertTypeTwoPercentage(existingData)
           .then(() => {
             console.log("Alert 3 successfully sent and promise resolved.");
-            res.send("3");
+            res.sendStatus(200);
           })
           .catch((error) => {
             console.error("Error sending alert:", error);
             res.status(500).send("-1");
           });
       } else if (emailType == "4") {
-        res.send("4");
+        res.sendStatus(200);
       } else {
         res.status(400).send("Invalid emailType");
       }
@@ -481,26 +480,7 @@ app.post("/reset-password", authenticateToken, async (req: Request, res: Respons
 });
 
 // allow json body
-app.use(express.json());
 
-function authenticateToken(req: any, res: any, next: any) {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
-  if (token == null) {
-    console.log("authtoken Empty");
-    return res.sendStatus(401);
-  }
-
-  jwt.verify(token, tokenJwt, (err: any, user: any) => {
-    if (err) {
-      console.log("authtoken failed");
-      return res.sendStatus(403);
-    }
-
-    req.user = user;
-    next();
-  });
-}
 
 app.listen(port, () => {
   console.log(`Server is listening on port ${port}`);

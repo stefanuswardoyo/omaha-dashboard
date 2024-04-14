@@ -41,7 +41,6 @@ const NewLogin = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      console.log("Sending Login Request", `${server_url}/login-admin`);
       const response = await fetch(`${server_url}/login-admin`, {
         method: "POST",
         headers: {
@@ -49,11 +48,9 @@ const NewLogin = () => {
         },
         body: JSON.stringify({ Username, Password }),
       });
-
       if (response.ok) {
         //console.log("login body1");
         const data = await response.json();
-
         // Store the token in localStorage or session storage
         localStorage.setItem("token", data.token);
         localStorage.setItem("Username", Username);
@@ -213,8 +210,8 @@ const NewLogin = () => {
                 marginLeft: "10px",
               }}
             >
-              <button class="button-64" role="button" onClick={handleSubmit}>
-                <span class="text">Sign in</span>
+              <button className="button-64" role="button" onClick={handleSubmit}>
+                <span className="text">Sign in</span>
               </button>
             </div>
           </Box>

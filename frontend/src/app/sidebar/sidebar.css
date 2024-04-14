@@ -1,30 +1,37 @@
-
 .mobilebar {
-    position: fixed;
-    top: 0;
-    right: -300px;   /*Start with the sidebar hidden outside the viewport. */
-    height: 100%;
-    width: 300px;
-    background-color: #1C2536;
-    transition: right 0.5s ease;
-    padding: 20px;
-    z-index: 9;
-    color: white;
-    /* box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); */
-  }
-  
- .mobilebar.open {
-    left: 0;  /* Show the sidebar by moving it to the right */
-  } 
+  position: absolute; /* Change position to absolute for mobile */
+  top: 0;
+  left: -300px; /* Start with the sidebar hidden outside the viewport for mobile */
+  height: 100%;
+  width: 300px;
+  background-color: #1c2536;
+  transition: left 0.5s ease; /* Use left instead of right */
+  padding: 20px;
+  z-index: 9;
+  color: white;
+}
 
+.mobilebar.open {
+  left: 0; /* Show the sidebar by moving it to the left for mobile */
+}
+
+.sidebar {
+  position: sticky; /* Change position to fixed for desktop */
+  top: 0;
+  left: 0;
+  background-color: #1c2536;
+  padding: 20px;
+  color: white;
+  height: 100vh;
+  width: 20%;
+  z-index: 2;
+  overflow-y: auto; /* Add overflow-y property */
+}
+
+/* Media query for mobile */
+@media (max-width: 768px) {
   .sidebar {
-    width: 20%;
-    background-color: #1C2536;
-    padding: 20px;
-    height: 100%;
-    color: white;
-    position: absolute;
-    /* border-top-right-radius: 8px; */
-    transition: all;
-    z-index: 2;
+    position: relative; /* Change position to relative for mobile */
+    width: 100%; /* Set width to 100% for mobile */
   }
+}

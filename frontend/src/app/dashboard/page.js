@@ -19,10 +19,9 @@ import Switch from "@mui/material/Switch";
 import EmailIcon from "@mui/icons-material/Email";
 const moment = require("moment");
 import Image from "next/image";
-import { fabClasses } from "@mui/material";
 require("dotenv").config();
 const server_url = process.env.SERVER_URL;
-
+const jwtToken = process.env.JWT_TOKEN;
 const Omaha_Dashboard = () => {
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -218,28 +217,23 @@ const Omaha_Dashboard = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token")}` // Include JWT token in the Authorization header
         },
         body: JSON.stringify(data),
       };
 
-      fetch(url, options)
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Network response was not ok");
-          }
-          return response.json();
-        })
-        .then((data) => {
-          console.log("POST request succeeded with JSON response:", data);
-        })
-        .catch((error) => {
-          console.error("There was a problem with the POST request:", error);
-        });
+      const response = await fetch(url, options);
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const responseData = await response.json();
+      console.log("POST request succeeded with JSON response:", responseData);
     } catch (error) {
-      console.error("An error occurred:", error);
+      console.error("There was a problem with the POST request:", error);
       // Handle errors here
     }
   };
+
 
   const updateSettingPercentageValue = async (value, user) => {
     try {
@@ -253,28 +247,23 @@ const Omaha_Dashboard = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token")}` // Include JWT token in the Authorization header
         },
         body: JSON.stringify(data),
       };
 
-      fetch(url, options)
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Network response was not ok");
-          }
-          return response.json();
-        })
-        .then((data) => {
-          console.log("POST request succeeded with JSON response:", data);
-        })
-        .catch((error) => {
-          console.error("There was a problem with the POST request:", error);
-        });
+      const response = await fetch(url, options);
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const responseData = await response.json();
+      console.log("POST request succeeded with JSON response:", responseData);
     } catch (error) {
-      console.error("An error occurred:", error);
+      console.error("There was a problem with the POST request:", error);
       // Handle errors here
     }
   };
+
 
   const updateTargetBalanceValue = async (value, user) => {
     try {
@@ -288,28 +277,23 @@ const Omaha_Dashboard = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token")}` // Include JWT token in the Authorization header
         },
         body: JSON.stringify(data),
       };
 
-      fetch(url, options)
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Network response was not ok");
-          }
-          return response.json();
-        })
-        .then((data) => {
-          console.log("POST request succeeded with JSON response:", data);
-        })
-        .catch((error) => {
-          console.error("There was a problem with the POST request:", error);
-        });
+      const response = await fetch(url, options);
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const responseData = await response.json();
+      console.log("POST request succeeded with JSON response:", responseData);
     } catch (error) {
-      console.error("An error occurred:", error);
+      console.error("There was a problem with the POST request:", error);
       // Handle errors here
     }
   };
+
 
   const updateSettingBalanceValue = async (value, user) => {
     try {
@@ -323,28 +307,23 @@ const Omaha_Dashboard = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token")}` // Include JWT token in the Authorization header
         },
         body: JSON.stringify(data),
       };
 
-      fetch(url, options)
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Network response was not ok");
-          }
-          return response.json();
-        })
-        .then((data) => {
-          console.log("POST request succeeded with JSON response:", data);
-        })
-        .catch((error) => {
-          console.error("There was a problem with the POST request:", error);
-        });
+      const response = await fetch(url, options);
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const responseData = await response.json();
+      console.log("POST request succeeded with JSON response:", responseData);
     } catch (error) {
-      console.error("An error occurred:", error);
+      console.error("There was a problem with the POST request:", error);
       // Handle errors here
     }
   };
+
 
   const updateAlertValue = async (value, user) => {
     try {
@@ -358,27 +337,23 @@ const Omaha_Dashboard = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token")}` // Include JWT token in the Authorization header
         },
         body: JSON.stringify(data),
       };
 
-      fetch(url, options)
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Network response was not ok");
-          }
-          return response.json();
-        })
-        .then((data) => {
-          console.log("POST request succeeded with JSON response:", data);
-        })
-        .catch((error) => {
-          console.error("There was a problem with the POST request:", error);
-        });
+      const response = await fetch(url, options);
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const responseData = await response.json();
+      console.log("POST request succeeded with JSON response:", responseData);
     } catch (error) {
-      console.error("An error occurred:", error);
+      console.error("There was a problem with the POST request:", error);
+      // Handle errors here
     }
   };
+
 
   const handleBalanceChange = (event, index, mode) => {
     event.preventDefault();
@@ -525,12 +500,14 @@ const Omaha_Dashboard = () => {
 
   function confirmDelete(serverNumber) {
     if (confirm(`Delete ${serverNumber} Account?`)) {
-      // Make HTTP POST request to delete account
+      // Get the token from local storage
+      const jwtToken = localStorage.getItem("token");
       const url = server_url + "/api/deleteAccount";
       fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${jwtToken}` // Include JWT token in the Authorization header
         },
         body: JSON.stringify({ serverNumber }),
       })
@@ -550,6 +527,7 @@ const Omaha_Dashboard = () => {
         });
     }
   }
+
 
 
   return (
@@ -590,12 +568,12 @@ const Omaha_Dashboard = () => {
                   }}
                 >
                   <div className="card-row">
-                    <div class="flex flex-col items-end mt-3 border-t border-gray-700">
-                      <div class="flex items-center justify-center w-6 h-6 mt-2 rounded transition-transform transform hover:scale-110" onClick={() => confirmDelete(item.Server)}>
+                    <div className="flex flex-col items-end mt-3 border-t border-gray-700">
+                      <div className="flex items-center justify-center w-6 h-6 mt-2 rounded transition-transform transform hover:scale-110" onClick={() => confirmDelete(item.Server)}>
                         <Image
                           src="./img/delete.svg"
                           alt="Delete Icon"
-                          class="w-6 h-6 mr-2"
+                          className="w-6 h-6 mr-2"
                           width="6"
                           height="6"
                         />
@@ -614,12 +592,57 @@ const Omaha_Dashboard = () => {
                   <div className="row-divider"></div>
                   <div className="card-row">
                     <div className="row-item">
-                      <AccountBalanceIcon
+                      <AccountBalanceWalletIcon
                         style={{ color: "white", fontSize: "20px" }}
                       />
-                      <span className="row-label">Server:</span>
+                      <span className="row-label">Balance:</span>
                     </div>
-                    <span className="row-value">{item.Server}</span>
+                    <span className="row-value">
+                      $
+                      {parseFloat(item.Balance).toLocaleString("en-US", {
+                        minimumFractionDigits: 2,
+                      })}
+                    </span>
+                  </div>
+                  <div className="row-divider"></div>
+                  <div className="card-row">
+                    <div className="row-item">
+                      <InsightsIcon
+                        style={{ color: "white", fontSize: "20px" }}
+                      />
+                      <span className="row-label">Floating Pnl:</span>
+                    </div>
+                    <span
+                      className={`row-value ${(
+                        parseFloat(item.Equity) - parseFloat(item.Balance)
+                      ).toFixed(2) > 0
+                        ? "dark-green"
+                        : (
+                          parseFloat(item.Equity) - parseFloat(item.Balance)
+                        ).toFixed(2) < 0
+                          ? "red"
+                          : "white"
+                        }`}
+                      style={{
+                        color:
+                          (
+                            parseFloat(item.Equity) - parseFloat(item.Balance)
+                          ).toFixed(2) > 0
+                            ? "darkgreen"
+                            : (
+                              parseFloat(item.Equity) -
+                              parseFloat(item.Balance)
+                            ).toFixed(2) < 0
+                              ? "red"
+                              : "white",
+                      }}
+                    >
+                      $
+                      {parseFloat(item.Equity - item.Balance).toLocaleString(
+                        "en-US",
+                        { minimumFractionDigits: 2 }
+                      )}
+                    </span>
                   </div>
                   <div className="row-divider"></div>
                   <div className="card-row">
@@ -644,13 +667,25 @@ const Omaha_Dashboard = () => {
                         : "ACTIVE"}
                     </span>
                   </div>
-
-                  <div class="flex flex-col items-end mt-3 border-t border-gray-700">
-                    <div class="flex items-center justify-center w-6 h-6 mt-2 rounded transition-transform transform hover:scale-110" onClick={() => handleMinimizeToggle(index)}>
+                  <div className="row-divider"></div>
+                  <div className="card-row">
+                    <div className="row-item">
+                      <EmailIcon style={{ color: "white", fontSize: "20px" }} />
+                      <span className="row-label">Alert:</span>
+                    </div>
+                    <div className="row-value">
+                      <Switch
+                        checked={alert[index]}
+                        onClick={() => handleAlert(index, item.Server)}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end mt-3 border-t border-gray-700">
+                    <div className="flex items-center justify-center w-6 h-6 mt-2 rounded transition-transform transform hover:scale-110" onClick={() => handleMinimizeToggle(index)}>
                       <Image
                         src="./img/minimize.svg"
                         alt="Delete Icon"
-                        class="w-6 h-6 mr-2"
+                        className="w-6 h-6 mr-2"
                         width="6"
                         height="6"
                       />
@@ -659,67 +694,16 @@ const Omaha_Dashboard = () => {
 
                   {!minimizedCards[index] && (
                     <>
-
                       <div className="row-divider"></div>
                       <div className="card-row">
                         <div className="row-item">
-                          <AccountBalanceWalletIcon
+                          <AccountBalanceIcon
                             style={{ color: "white", fontSize: "20px" }}
                           />
-                          <span className="row-label">Balance:</span>
+                          <span className="row-label">Server:</span>
                         </div>
-                        <span className="row-value">
-                          $
-                          {parseFloat(item.Balance).toLocaleString("en-US", {
-                            minimumFractionDigits: 2,
-                          })}
-                        </span>
+                        <span className="row-value">{item.Server}</span>
                       </div>
-
-
-                      <div className="row-divider"></div>
-                      <div className="card-row">
-                        <div className="row-item">
-                          <InsightsIcon
-                            style={{ color: "white", fontSize: "20px" }}
-                          />
-                          <span className="row-label">Floating Pnl:</span>
-                        </div>
-                        <span
-                          className={`row-value ${(
-                            parseFloat(item.Equity) - parseFloat(item.Balance)
-                          ).toFixed(2) > 0
-                            ? "dark-green"
-                            : (
-                              parseFloat(item.Equity) - parseFloat(item.Balance)
-                            ).toFixed(2) < 0
-                              ? "red"
-                              : "white"
-                            }`}
-                          style={{
-                            color:
-                              (
-                                parseFloat(item.Equity) - parseFloat(item.Balance)
-                              ).toFixed(2) > 0
-                                ? "darkgreen"
-                                : (
-                                  parseFloat(item.Equity) -
-                                  parseFloat(item.Balance)
-                                ).toFixed(2) < 0
-                                  ? "red"
-                                  : "white",
-                          }}
-                        >
-                          $
-                          {parseFloat(item.Equity - item.Balance).toLocaleString(
-                            "en-US",
-                            { minimumFractionDigits: 2 }
-                          )}
-                        </span>
-                      </div>
-
-
-
                       <div className="row-divider"></div>
                       <div className="card-row">
                         <div className="row-item">
@@ -913,22 +897,6 @@ const Omaha_Dashboard = () => {
                         <span className="row-value">
                           {timestampToTime(item.LastHeartBeat)}
                         </span>
-                      </div>
-
-
-
-                      <div className="row-divider"></div>
-                      <div className="card-row">
-                        <div className="row-item">
-                          <EmailIcon style={{ color: "white", fontSize: "20px" }} />
-                          <span className="row-label">Alert:</span>
-                        </div>
-                        <div className="row-value">
-                          <Switch
-                            checked={alert[index]}
-                            onClick={() => handleAlert(index, item.Server)}
-                          />
-                        </div>
                       </div>
                     </>
                   )}

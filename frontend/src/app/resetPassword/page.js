@@ -7,11 +7,13 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useRouter } from "next/navigation";
 
 require("dotenv").config();
 const server_url = process.env.SERVER_URL;
 
 const ResetPassword = () => {
+  const router = useRouter();
   const [oldPassword, setoldPassword] = useState("");
   const [newPassword, setnewPassword] = useState("");
   const [confirmPassword, setconfirmPassword] = useState("");
@@ -57,6 +59,7 @@ const ResetPassword = () => {
       toast.success("Password changed successfully", {
         position: "bottom-right", // or use 'toast.POSITION.BOTTOM_LEFT'
       });
+      router.push("/login");
     } else {
       toast.error(data.message, {
         position: "bottom-right", // or use 'toast.POSITION.BOTTOM_LEFT'
@@ -69,7 +72,7 @@ const ResetPassword = () => {
     <>
       <div
         style={{
-          backgroundImage: "url(/img/clientBg.png)",
+          backgroundImage: "url(/img/dashboardBg.png)",
           backgroundPosition: "center",
           display: "flex",
         }}
