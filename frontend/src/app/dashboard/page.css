@@ -5,17 +5,6 @@
   padding: 1%;
   width: 79%;
 }
-
-.detail-card{
-  width: 350px;
-  border-radius: 10px;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.12);
-  padding: 20px;
-  position: relative;
-  margin-left: 10px;
-  margin-top:20px;
-  transition: height 0.3s ease; /* Add transition for smoother height change */
-}
 .minimized {
   height: 480px; /* Adjust the height when card is minimized */
 }
@@ -47,10 +36,35 @@
   position: relative;
 
 }
-.card-container{
-display: flex;
-flex-wrap: wrap;
+.detail-card{
+  width: 350px;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.12);
+  padding: 20px;
+  position: relative;
+  margin-left: 10px;
+  margin-top:20px;
+  transition: height 0.3s ease; /* Add transition for smoother height change */
+  background-color: blue;
+}
+.card-container {
+  display: flex;
+  flex-wrap: wrap; /* Allow cards to wrap to the next line if there's not enough space */
+  padding-left: 15%; /* Ensure card container starts after the sidebar */
+  justify-content: flex-start; /* Align cards to start from the left */
+  align-items: flex-start; /* Align cards to start from the top */
+  gap: 20px; /* Add gap between cards */
+  background-color: #1c2536;
+}
+@media (max-width: 768px) {
+  /* Styles for mobile view */
+  .detail-card {
+    width: 100px;
+  }
 
+  .card-container {
+    padding-left: 30%; /* Adjust padding for mobile view */
+  }
 }
 
 .line-1 {
@@ -112,7 +126,10 @@ flex-wrap: wrap;
   text-transform: uppercase;
 }
 
-
+.sidebar-container {
+  display: flex;
+  padding: 1%; /* Add padding to all sides */
+}
 
 @media only screen and (max-width: 800px) {
  

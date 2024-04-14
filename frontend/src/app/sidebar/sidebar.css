@@ -1,37 +1,45 @@
-.mobilebar {
-  position: absolute; /* Change position to absolute for mobile */
-  top: 0;
-  left: -300px; /* Start with the sidebar hidden outside the viewport for mobile */
-  height: 100%;
-  width: 300px;
-  background-color: #1c2536;
-  transition: left 0.5s ease; /* Use left instead of right */
-  padding: 20px;
-  z-index: 9;
-  color: white;
-}
-
-.mobilebar.open {
-  left: 0; /* Show the sidebar by moving it to the left for mobile */
-}
-
 .sidebar {
-  position: sticky; /* Change position to fixed for desktop */
+  position: fixed;
   top: 0;
   left: 0;
   background-color: #1c2536;
   padding: 20px;
   color: white;
+  transition: transform 0.3s ease;
+  width: 15%; /* Default width */
   height: 100vh;
-  width: 20%;
+  overflow-y: auto;
   z-index: 2;
-  overflow-y: auto; /* Add overflow-y property */
+  display: flex;
+  flex-direction: column;
 }
 
-/* Media query for mobile */
-@media (max-width: 768px) {
+/* Media query for smaller screen sizes */
+@media (max-width: 800px) {
   .sidebar {
-    position: relative; /* Change position to relative for mobile */
-    width: 100%; /* Set width to 100% for mobile */
+    width: 22%; /* Set width to 30% for mobile view */
   }
 }
+
+
+.sidebar.open {
+  transform: translateX(0); /* Use transform for smooth animation */
+}
+
+/* Sidebar content */
+.sidebar a {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  margin-top: 10px;
+  color: white;
+  text-decoration: none;
+}
+
+.sidebar a:hover {
+  background-color: #374151;
+}
+
+

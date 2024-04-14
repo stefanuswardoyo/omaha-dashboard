@@ -22,9 +22,23 @@ import Image from "next/image";
 require("dotenv").config();
 const server_url = process.env.SERVER_URL;
 const jwtToken = process.env.JWT_TOKEN;
+
 const Omaha_Dashboard = () => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768); // Example breakpoint for mobile view
+    };
+
+    handleResize(); // Call it initially
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
   const router = useRouter();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [Balance, setBalance] = useState([]);
   const [previousBalance, setPreviousBalance] = useState([]);
   const [settingBalance, setSettingBalance] = useState([]);
@@ -534,25 +548,17 @@ const Omaha_Dashboard = () => {
     <>
       <div
         style={{
-          backgroundImage: "url(/img/dashboardBg.png)",
           display: "flex",
           backgroundRepeat: "repeat-y",
-          backgroundSize: "cover",
         }}
       >
-        <div
-          onMouseEnter={() => setIsSidebarOpen(true)}
-          onMouseLeave={() => setIsSidebarOpen(false)}
-          style={{
-            backgroundColor: "transparent",
-            height: "100vh",
-            width: "70px",
-            zIndex: "1",
-          }}
-        >
-          {isSidebarOpen ? <Sidebar /> : <MinimizedSidebar />}
-        </div>
-        <br></br>
+        {isMobile ? (
+          <MinimizedSidebar />
+        ) : (
+          <div className="sidebar-container">
+            <Sidebar />
+          </div>
+        )}
 
         <div className="card-container">
           {jsonData.map(
@@ -562,7 +568,7 @@ const Omaha_Dashboard = () => {
                   key={index}
                   className={`detail-card ${minimizedCards[index] ? 'minimized' : ''}`}
                   style={{
-                    backgroundColor: "rgba(179, 184, 193, .20)",
+                    backgroundColor: "darkgreen",
                     backdropFilter: "blur(30px)",
                     color: "white",
                   }}
@@ -616,7 +622,7 @@ const Omaha_Dashboard = () => {
                       className={`row-value ${(
                         parseFloat(item.Equity) - parseFloat(item.Balance)
                       ).toFixed(2) > 0
-                        ? "dark-green"
+                        ? "blue"
                         : (
                           parseFloat(item.Equity) - parseFloat(item.Balance)
                         ).toFixed(2) < 0
@@ -628,7 +634,7 @@ const Omaha_Dashboard = () => {
                           (
                             parseFloat(item.Equity) - parseFloat(item.Balance)
                           ).toFixed(2) > 0
-                            ? "darkgreen"
+                            ? "blue"
                             : (
                               parseFloat(item.Equity) -
                               parseFloat(item.Balance)
@@ -659,7 +665,7 @@ const Omaha_Dashboard = () => {
                         color:
                           parseInt(item.timeDifference) === -1
                             ? "red"
-                            : "green",
+                            : "blue",
                       }}
                     >
                       {parseInt(item.timeDifference) === -1
