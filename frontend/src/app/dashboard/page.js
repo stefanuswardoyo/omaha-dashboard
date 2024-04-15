@@ -87,7 +87,13 @@ const Omaha_Dashboard = () => {
         const response = await fetch(
           `${server_url}/account/data?Username=${encodeURIComponent(
             storedUsername
-          )}`
+          )}`,
+          {
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem("token")}` // Include JWT token in the Authorization header
+          },
+        }
         );
         const data = await response.json();
 
@@ -568,9 +574,20 @@ const Omaha_Dashboard = () => {
                   key={index}
                   className={`detail-card ${minimizedCards[index] ? 'minimized' : ''}`}
                   style={{
-                    backgroundColor: "darkgreen",
+                    backgroundColor: (() => {
+                      const totalBalanceAndPNL = (parseFloat(item.Equity));
+                      var LossPercentageValue = (parseFloat(item.Balance) * (parseFloat(item.ProfitPercentage) / 100));
+                      LossPercentageValue = parseFloat(item.Balance) - LossPercentageValue;
+                      if (parseFloat(item.TargetBalance) < totalBalanceAndPNL && parseFloat(item.TargetBalance)  > 0) {
+                        return "darkgreen";
+                      }
+                      if (totalBalanceAndPNL < parseFloat(LossPercentageValue) && parseFloat(item.ProfitPercentage) > 0)  {
+                        return "lightcoral";
+                      }
+                      return "grey"
+                    })(),
                     backdropFilter: "blur(30px)",
-                    color: "white",
+        
                   }}
                 >
                   <div className="card-row">
